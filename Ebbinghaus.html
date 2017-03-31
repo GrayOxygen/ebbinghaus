@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>根据艾宾浩斯计算复习日期</title>
+    <meta charset="utf-8">
+    <!--
+        由于每天要记忆新的单词，又要复习老的单词，根据艾宾浩斯遗忘曲线，可以针对性地复习
+        根据ebbinghaus遗忘曲线制定如下复习安排
+    　　1． 第一个记忆周期：5分钟
+    　　2． 第二个记忆周期：30分钟
+    　　3． 第三个记忆周期：12小时
+    　　4． 第四个记忆周期：1天
+    　　5． 第五个记忆周期：2天
+    　　6． 第六个记忆周期：4天
+    　　7． 第七个记忆周期：7天
+    　　8． 第八个记忆周期：15天
+        9.  第九个记忆周期：31天
+        举例说明下本程序的作用：
+        我要背绿皮书（新东方的单词书），共50个list，我们每天早上和晚上背一次，间隔差不多12个小时，一页大概需要5分钟记忆时间，一个list大概30分钟背完，这里就是一天记忆过程，包含了上边的第一到第三个记忆周期（边背边记刚背的新单词）
+        那么复习时，我需要安排在所学新单词当天的1,2,4,7,15,31天后复习
+        所以，为了人工去计算复习的日期，这里用程序自动计算了，便于我去做复习安排
+    -->
+</head>
+<style type="text/css">
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0 0;
+    padding: 0 0;
+    background-color: #BEBEBE;
+}
+
+div.search {
+    margin: 0 auto;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+}
+
+div.search>input {
+    width: 21%;
+}
+
+div.blank {
+    width: 100%;
+    height: 20px;
+}
+
+div.header {
+    display: block;
+    text-align: center;
+    margin: 0 auto;
+    height: 50%;
+    width: 50%;
+    padding-bottom: 20px;
+    padding-top: 30px;
+}
+
+ol {
+    width: 30%;
+    text-align: center;
+    display: block;
+    margin: 0 auto;
+}
+
+textarea {
+    width: 50%;
+    height: 70%;
+}
+</style>
+
+<body>
+    <div class="header">
+        <header>艾宾浩斯曲线计算复习日期</header>
+        <p>由于每天要记忆新的单词，又要复习老的单词，根据艾宾浩斯遗忘曲线，可以针对性地复习</p>
+        <p>根据ebbinghaus遗忘曲线制定如下复习安排</p>
+        <ol>
+            <li>第一个记忆周期：5分钟 </li>
+            <li>第二个记忆周期：30分钟</li>
+            <li>第三个记忆周期：12小时</li>
+            <li>第四个记忆周期：1天</li>
+            <li>第五个记忆周期：2天</li>
+            <li>第六个记忆周期：4天</li>
+            <li>第七个记忆周期：7天</li>
+            <li>第八个记忆周期：15天</li>
+            <li>第九个记忆周期：31天</li>
+        </ol>
+        <p>
+            举例说明下本程序的作用： 我要背绿皮书（新东方的单词书），共50个list，我们每天早上和晚上背一次，间隔差不多12个小时，一页大概需要5分钟记忆时间，一个list大概30分钟背完，这里就是一天记忆的过程，即第一到第三个记忆周期（边背边记刚背的新单词）。对于当天之后的复习，需要安排在所学新单词当天的1,2,4,7,15,31天后复习，4月1号背的新内容和4月2号的以及之后的每一天的内容都要手动算出复习日期，太麻烦！所以，为了不去人工去计算复习的日期，这里用程序实现，便于我去做复习安排（本人用excel做复习计划）
+        </p>
+    </div>
+    <div class="search">
+        <div class="blank"> </div>
+        记忆起始日期：
+        <input type="text" name="" id="startDate" placeholder="开始日期，格式如2017-04-01和2017-12-22" value="2017-04-01" />
+        <div class="blank"> </div>
+        复习周期：
+        <input type="text" name="" id="repetition" placeholder="复习周期,用逗号区分，如0,1,2,4,15" value="0,1,2,4,15,31" />
+        <div class="blank"> </div>
+        新内容记忆总天数：<input type="text" name="" id="totalStudyNewDays" placeholder="记忆新内容总天数，如25和1" value="25" />
+        <div class="blank"> </div>
+        <textarea id="result"></textarea>
+        <div class="blank"> </div>
+        <input type="button" name="" value="生成复习日期" onclick="generate()">
+    </div>
+    <script type="text/javascript">
+    // 日期格式化
+    Date.prototype.Format = function(fmt) {
+        var o = {
+            "M+": this.getMonth() + 1, //月份
+            "d+": this.getDate(), //日
+            "h+": this.getHours(), //小时
+            "m+": this.getMinutes(), //分
+            "s+": this.getSeconds(), //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+            "S": this.getMilliseconds() //毫秒
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+
+    // 生成复习日期
+    function generate() {
+        // 学习的开始日期
+        var startDate = new Date(document.getElementById("startDate").value) //new Date("2017-04-01")
+        // 艾宾浩斯曲线得出的复习日期，0表示当天，1表示一天后，31表示31天后进行复习
+        var ebbinghausDays = document.getElementById("repetition").value.split(",") //[0, 1, 2, 4, 7, 15, 31]
+
+        var totalStudyNewDays =  parseInt(document.getElementById("totalStudyNewDays").value) // 25
+
+        // 得到所有学习日期，从startDate当天开始，这里计算的25天内学习内容                                                    
+        var studyArray = new Array();
+        for (var i = 0; i < totalStudyNewDays; i++) {
+            var tempDate = new Date(startDate.getTime())
+            tempDate.setDate(tempDate.getDate() + i)
+            studyArray.push(tempDate)
+        }
+        
+        // 每个学习日期对应的复习日期，这里计算1,2,4,7,15,31天后的日期
+        var map = new Map()
+
+        // 将map中的日期格式化
+        function formatJSON(map) {
+            var jsonObj = {}
+            for (let [key, value] of map.entries()) {
+                var repeObj = new Array()
+                for (idx in value) {
+                    repeObj.push(value[idx].Format("yyyy-MM-dd"))
+                }
+                jsonObj[key.Format("yyyy-MM-dd")] = repeObj
+            }
+            return JSON.stringify(jsonObj, null, 2);
+        }
+
+        for (temp in studyArray) {
+            var ebbinghausArray = new Array()
+            for (index in ebbinghausDays) {
+                var tempDate = new Date(studyArray[temp].getTime())
+                tempDate.setDate(tempDate.getDate() + parseInt(ebbinghausDays[index]))
+                ebbinghausArray.push(tempDate)
+            }
+            map.set(studyArray[temp], ebbinghausArray)
+        }
+
+        document.getElementById("result").value = formatJSON(map)
+
+    }
+    </script>
+</body>
+
+</html>
